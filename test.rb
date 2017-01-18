@@ -1,18 +1,17 @@
 module Menu
-	def self.menu
+	def menu
 		puts "Welcome and select menu option
 		1) add
 		2) show
 		3) write to a file
+		4) read from a file
 		Q) quit"
 	end
 
-	def self.show
+	def show
 		menu
 	end
-end
 
-module Promptable
 	def prompt (message='What would you like to do?', symbol=':>')
 		puts message
 		puts symbol
@@ -20,13 +19,11 @@ module Promptable
 	end
 end
 
-
-
 class List #list class
 	
 	attr_accessor :all_tasks
 	
-	def initialize ()
+	def initialize
 		@all_tasks = []
 	end
 	
@@ -46,6 +43,12 @@ class List #list class
 		IO.write(filename, @all_tasks.map(&:to_s).join("\n"))
 	end
 
+	def read_from_file(filename)
+		IO.read(filename).each do |line|
+			add(Task.new(line.chomp))
+		end
+	end
+
 end
 
 class Task #task class
@@ -54,11 +57,14 @@ class Task #task class
 		@description =description
 	end
 
+	def to_s(description)
+		description
+	end
+
 end
 
 if __FILE__ == $PROGRAM_NAME
-	
-	include Promptable
+	include Menu
 
 	my_list = List.new
 	puts "Please choose from the following list of options:"
@@ -70,11 +76,17 @@ if __FILE__ == $PROGRAM_NAME
 			my_list.show
 		when "3"
 			my_list.write_to_file(Task.new(prompt("What is the filename to write to?")))
+		when "4"
+			begin
+				my_list.read_from_file(Task.new(prompt("What is the filename to read from?")))
+			rescue Errno::ENOENT
+				puts "That filename does not exist, try again."
+			end
 		else
 			puts "Sorry, I did not understand"
 		end
-		prompt("Press enter to continue", " ")
+	prompt("Press enter to continue", " ")
 	end
 	puts "Outro-Thanks for using the menu system"
-end	
 
+end	
