@@ -3,8 +3,9 @@ module Menu
 		puts "Welcome and select menu option
 		1) add
 		2) show
-		3) write to a file
-		4) read from a file
+		3) delete
+		4) write to a file
+		5) read from a file
 		Q) quit"
 	end
 
@@ -32,11 +33,14 @@ class List #list class
 	end
 
 	def show
-		all_tasks.each do |task| puts task.description end
+		all_tasks.each_with_index do |task, index| 
+			index +=1
+			puts "#{index} #{task}"
+		end
 	end
-	
-	def to_s(description)
-		puts description
+
+	def delete(task_number)
+		all_tasks.delete_at(task_number - 1)
 	end
 
 	def write_to_file(filename)
@@ -44,7 +48,7 @@ class List #list class
 	end
 
 	def read_from_file(filename)
-		IO.read(filename).each do |line|
+		IO.readlines(filename).each do |line|
 			add(Task.new(line.chomp))
 		end
 	end
@@ -57,7 +61,7 @@ class Task #task class
 		@description =description
 	end
 
-	def to_s(description)
+	def to_s
 		description
 	end
 
@@ -75,10 +79,13 @@ if __FILE__ == $PROGRAM_NAME
 		when "2"
 			my_list.show
 		when "3"
-			my_list.write_to_file(Task.new(prompt("What is the filename to write to?")))
+			my_list.show
+			my_list.delete(prompt("What do you want to delete?").to_i)
 		when "4"
+			my_list.write_to_file(prompt("What is the filename to write to?"))
+		when "5"
 			begin
-				my_list.read_from_file(Task.new(prompt("What is the filename to read from?")))
+				my_list.read_from_file(prompt("What is the filename to read from?"))
 			rescue Errno::ENOENT
 				puts "That filename does not exist, try again."
 			end
