@@ -7,6 +7,7 @@ module Menu
 		4) update
 		5) write to a file
 		6) read from a file
+		7) toggle status
 		Q) quit"
 	end
 
@@ -36,7 +37,7 @@ class List #list class
 	def show
 		all_tasks.each_with_index do |task, index| 
 			index +=1
-			puts "#{index} #{task}"
+			puts "#{index}: #{task}"
 		end
 	end
 
@@ -55,25 +56,51 @@ class List #list class
 	end
 
 	def write_to_file(filename)
-		IO.write(filename, @all_tasks.map(&:to_s).join("\n"))
+		machine_file = @all_tasks.map(&:to_s).join("\n")
+		IO.write(filename, machine_file)
 	end
 
 	def read_from_file(filename)
 		IO.readlines(filename).each do |line|
-			add(Task.new(line.chomp))
+			status, *description = line.split(":")
+			status = status.include?("X")	
+			add(Task.new(description.join(":").strip, status))
 		end
+	end
+
+	def toggle(task_number)
+		if task_number <1 || task_number > all_tasks.length
+			raise "No such task number"
+		end
+		all_tasks[task_number -1].toggle_status
 	end
 
 end
 
 class Task #task class
 	attr_accessor :description
-	def initialize(description)
+	attr_accessor :status
+	def initialize(description, status = false)
 		@description =description
+		@status =status
 	end
 
 	def to_s
-		description
+		"#{represent_status} : #{description}"
+	end
+
+	def completed?
+		status
+	end
+
+	def toggle_status
+		@status = !completed?
+	end
+
+	private
+
+	def represent_status
+		"#{completed? ? '[X]' : '[ ]'}"
 	end
 
 end
@@ -110,6 +137,13 @@ if __FILE__ == $PROGRAM_NAME
 				my_list.read_from_file(prompt("What is the filename to read from?"))
 			rescue Errno::ENOENT
 				puts "That filename does not exist, try again."
+			end
+		when "7"
+			begin 
+				my_list.show
+				my_list.toggle(prompt("Which task status do you want to change?").to_i)
+			rescue
+				puts "that task index does not exist!"
 			end
 		else
 			puts "Sorry, I did not understand"

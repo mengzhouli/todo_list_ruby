@@ -1,2 +1,3 @@
-add
-eat
+[X] : eat
+[ ] : poo
+[ ] : fart
